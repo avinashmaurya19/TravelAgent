@@ -1,3 +1,7 @@
+---
+trigger: always_on
+---
+
 # ⚠️ Things to Avoid — Anti-Patterns & Scope Boundaries (`things-to-avoid.md`)
 
 This rule file records strict anti-patterns, scope boundaries, and project pitfalls. It is a **living document** that must be updated whenever a mistake or edge-case failure occurs.
@@ -19,10 +23,13 @@ This rule file records strict anti-patterns, scope boundaries, and project pitfa
 - ❌ **NEVER rely on stale search prices for booking.** Always execute `check_availability` and `calculate_fare` prior to confirmation.
 - ❌ **NEVER return ungrounded travel policy answers.** Use the FAISS policy retriever tool for baggage, refund, and cancellation questions.
 - ❌ **NEVER make unverified code changes.** Always run verification tests or API calls to prove functionality.
-
+- ❌ **Never set version number in requirements.txt file.
 ---
 
 ## 3. Discovered Mistake Log
 *(Add new recurring mistakes or bug patterns here as they are discovered during development)*
 
 - *Initial setup: Ensure workspace files are created without artifact metadata parameter in Antigravity tools.*
+- *Pydantic validation: When using Pydantic's `EmailStr`, ensure `email-validator` is present in requirements.*
+- *Flight identifiers: Flight lookups should gracefully support both unique database UUID (`id`) and human/agent-friendly `flight_number` (e.g. `AI-559`), preventing 404 errors when flight numbers are supplied.*
+

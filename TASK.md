@@ -6,11 +6,12 @@ This checklist tracks tasks across the 10 implementation phases.
 ---
 
 ## Phase 1: Backend Foundation (Deterministic Services)
-- [ ] Initialize Python environment, FastAPI app structure, and requirements.txt (`2026-09-04`)
-- [ ] Create SQLAlchemy database models (`User`, `Flight`, `Booking`, `Passenger`, `UserPreference`, `Conversation`, `Message`)
-- [ ] Write `scripts/generate_flights.py` mock data generator (500+ realistic flight records across top Indian routes)
-- [ ] Implement deterministic flight search, detail, fare calculation, and booking endpoints
-- [ ] Add unit tests for flight repository search and filter functions
+- [x] Plan and structure Phase 1 Backend Foundation (Deterministic Services) (`2026-09-04`)
+- [x] Initialize Python environment, FastAPI app structure, and requirements.txt (`2026-09-04`)
+- [x] Create SQLAlchemy database models (`User`, `Flight`, `Booking`, `Passenger`, `UserPreference`, `Conversation`, `Message`) (`2026-09-04`)
+- [x] Write `scripts/generate_flights.py` mock data generator (2,400+ realistic flight records across top Indian routes) (`2026-09-04`)
+- [x] Implement deterministic flight search, detail, fare calculation, and booking endpoints (`2026-09-04`)
+- [x] Add unit tests for flight repository search and filter functions (`2026-09-04`)
 
 ## Phase 2: Flutter Frontend Foundations
 - [ ] Initialize Flutter project `travel_agent_flutter` with clean feature-based architecture
@@ -71,4 +72,4 @@ This checklist tracks tasks across the 10 implementation phases.
 ## 🛠️ Discovered During Work
 *New sub-tasks, edge cases, or refactoring tasks identified during implementation will be added below with timestamps.*
 
-- [ ] *No items discovered yet.*
+- [x] Resilient flight lookup: Support lookup by both primary UUID (`id`) and flight number (e.g. `AI-559`) in `FlightRepository` so users and LLM agents can query fare breakdown and availability seamlessly (`2026-09-05`)
