@@ -1,0 +1,50 @@
+# Environment files
+.env
+.env.local
+*.env
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+.venv/
+
+# Pytest & Coverage
+.pytest_cache/
+.coverage
+htmlcov/
+
+# FAISS local indices & SQLite DBs
+*.db
+*.sqlite
+*.sqlite3
+*.faiss
+*.index
+
+# Flutter & Dart
+.dart_tool/
+.packages
+.pub-cache/
+.pub/
+build/
+ios/Runner.xcworkspace
+ios/Runner.xcodeproj/project.xcworkspace
+ios/Runner.xcodeproj/xcuserdata
+android/.gradle
+android/app/build
+*.apk
+*.aab
+
+# IDE & OS files
+.DS_Store
+.vscode/
+*.swp
+*.swo
+.idea/
