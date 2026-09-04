@@ -1,0 +1,11 @@
+---
+description: Tech Stack, Tool Calling & Guardrail Rules
+globs: *
+---
+# Technical Stack & Safety Rules
+
+- Tech Stack: FastAPI + Pydantic v2, Flutter (GetX state management), Mistral/HF, PostgreSQL, FAISS, SSE.
+- Tool Calling: LLM must use Pydantic tool functions (`search_flights`, `check_availability`, `calculate_fare`, `create_booking`).
+- Guardrail: Never execute bookings without explicit human-in-the-loop confirmation (`POST /confirm`).
+- Pre-booking: Re-check availability & fare before booking.
+- RAG: Ground travel policy answers in FAISS retrieved markdown context.

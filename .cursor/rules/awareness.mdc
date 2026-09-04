@@ -1,0 +1,12 @@
+---
+description: Project Awareness, Context & Modularity Rules
+globs: *
+---
+# Project Awareness & Context Rules
+
+- **Always read @PLANNING.md** at the start of a new conversation to understand project architecture.
+- **Check @TASK.md before starting a new task.** If not listed, add it with a brief description and date.
+- **Never create a file longer than 500 lines of code.** Refactor by splitting into sub-modules.
+- **Mark completed tasks in @TASK.md immediately.**
+- **Add discovered sub-tasks to @TASK.md** under `### Discovered During Work`.
+- **Log new mistakes to @things-to-avoid.mdc**.

@@ -1,0 +1,11 @@
+---
+description: Anti-Patterns and Things to Avoid
+globs: *
+---
+# Things to Avoid
+
+- Do NOT build real airline/GDS integrations, real payment gateways, or hotel/bus/train bookings.
+- Do NOT allow raw SQL or direct DB mutations by LLM without tools.
+- Do NOT auto-finalize bookings without user confirmation.
+- Do NOT exceed 500 lines of code per file.
+- Do NOT return ungrounded travel policy answers without RAG context.

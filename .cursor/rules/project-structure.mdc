@@ -1,0 +1,9 @@
+---
+description: Project Directory & Architecture Rules
+globs: *
+---
+# Project Structure Rules
+
+- Backend: `travel_agent_backend/` (FastAPI app, agent tools, LLM interface, FAISS RAG, SQL models)
+- Frontend: `travel_agent_flutter/` (GetX feature modules: controllers, views, bindings for home, assistant, flights, booking, agent_trace)
+- Always place API endpoints in `app/api/` and agent tools in `app/agent/tools/`.

@@ -1,0 +1,10 @@
+---
+description: 4-Phase Vibe Coding Workflow Rules
+globs: *
+---
+# Standard Workflow Rules
+
+- **Planning Phase**: Discuss plan first ("Let's plan <feature> don't write code yet"). Update @PLANNING.md and @TASK.md.
+- **Implementation Phase**: Write modular code, review diffs, max 500 lines/file. Record mistakes to @things-to-avoid.mdc.
+- **Test Phase**: Verify functionality with tests or manual execution.
+- **Document Phase**: Mark task done in @TASK.md, log discovered sub-tasks, update docs.
