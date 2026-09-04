@@ -14,11 +14,11 @@ This checklist tracks tasks across the 10 implementation phases.
 - [x] Add unit tests for flight repository search and filter functions (`2026-09-04`)
 
 ## Phase 2: Flutter Frontend Foundations
-- [ ] Initialize Flutter project `travel_agent_flutter` with clean feature-based architecture
-- [ ] Implement UI theme, typography, and responsive color palette
-- [ ] Create Home screen with quick prompt shortcuts ("Delhi to Goa weekend", "Delhi to Mumbai tomorrow")
-- [ ] Build Assistant Chat screen UI with chat bubbles and interactive flight cards
-- [ ] Create Flight Details modal sheet, Comparison view, and Booking Summary screen
+- [x] Initialize Flutter project `travel_agent_flutter` with clean feature-based architecture (`2026-09-05`)
+- [x] Implement UI theme, typography, and responsive color palette (`2026-09-05`)
+- [x] Create Home screen with quick prompt shortcuts ("Delhi to Goa weekend", "Delhi to Mumbai tomorrow") (`2026-09-05`)
+- [x] Build Assistant Chat screen UI with chat bubbles and interactive flight cards (`2026-09-05`)
+- [x] Create Flight Details modal sheet, Comparison view, and Booking Summary screen (`2026-09-05`)
 
 ## Phase 3: LLM Integration & Structured Intent Engine
 - [ ] Implement abstract `LLMInterface` class (`app/llm/base.py`)

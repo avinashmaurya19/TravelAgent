@@ -32,4 +32,5 @@ This rule file records strict anti-patterns, scope boundaries, and project pitfa
 - *Initial setup: Ensure workspace files are created without artifact metadata parameter in Antigravity tools.*
 - *Pydantic validation: When using Pydantic's `EmailStr`, ensure `email-validator` is present in requirements.*
 - *Flight identifiers: Flight lookups should gracefully support both unique database UUID (`id`) and human/agent-friendly `flight_number` (e.g. `AI-559`), preventing 404 errors when flight numbers are supplied.*
+- *Android physical device testing: `10.0.2.2` only exists in emulators. For physical devices attached via USB, run `adb reverse tcp:8000 tcp:8000` and route requests through `http://127.0.0.1:8000/api/v1`.*
 
