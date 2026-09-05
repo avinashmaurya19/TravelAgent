@@ -20,6 +20,9 @@ class AssistantController extends GetxController {
   final messages = <ChatMessage>[].obs;
   final isProcessing = false.obs;
 
+  // Session ID for short-term memory persistence
+  final String sessionId = const Uuid().v4();
+
   // Active conversational state
   String? currentOrigin;
   String? currentDestination;
@@ -134,6 +137,7 @@ class AssistantController extends GetxController {
       final agentResponse = await agentRepository.chatWithAgent(
         message: query,
         state: travelState,
+        sessionId: sessionId,
         chatHistory: recentHistory,
       );
 

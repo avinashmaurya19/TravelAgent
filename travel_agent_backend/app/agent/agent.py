@@ -60,21 +60,25 @@ class AgentOrchestrator:
         db: Session,
         llm: Optional[LLMInterface] = None,
         max_iterations: int = 5,
+        user_preferences: Optional[Dict[str, Any]] = None,
     ):
         self.db = db
         self.llm = llm or MistralLLM()
         self.max_iterations = max_iterations
+        self.user_preferences = user_preferences
 
     def run(
         self,
         user_message: str,
         state: Optional[TravelState] = None,
         chat_history: Optional[List[ChatMessage]] = None,
+        user_preferences: Optional[Dict[str, Any]] = None,
     ) -> AgentResult:
         """Run the core while-loop agent orchestrator for a single user turn."""
         current_state = state or TravelState()
         tool_traces: List[ToolExecutionTrace] = []
         recommended_flights: List[Dict[str, Any]] = []
+        current_preferences = user_preferences or self.user_preferences
 
         # Prepare messages with current date context
         from datetime import date as dt_date
@@ -85,6 +89,20 @@ class AgentOrchestrator:
             f"[Current Calendar Date]: Today is {today_str}. The current year is {today_obj.year}. "
             f"All travel dates refer to {today_obj.year} or future dates. NEVER search in past years like 2023 or 2024."
         )
+        if current_preferences:
+            pref_notes = []
+            if current_preferences.get("preferred_airline"):
+                pref_notes.append(f"Preferred Airline: {current_preferences['preferred_airline']}")
+            if current_preferences.get("preferred_cabin"):
+                pref_notes.append(f"Preferred Cabin: {current_preferences['preferred_cabin']}")
+            if current_preferences.get("max_stops") is not None:
+                pref_notes.append(f"Max Stops: {current_preferences['max_stops']}")
+            if pref_notes:
+                system_content += (
+                    f"\n[User Travel Preferences]: {', '.join(pref_notes)}. "
+                    "Respect these preferences by default unless the user explicitly requests something else in their query."
+                )
+
         messages: List[ChatMessage] = [
             ChatMessage(role="system", content=system_content),
         ]
@@ -160,7 +178,15 @@ class AgentOrchestrator:
                     # Extract flight objects to return to UI cards and apply ranking
                     if "flights" in tool_result and isinstance(tool_result["flights"], list):
                         if tc.name in ("search_flights", "filter_flights"):
-                            tool_result["flights"] = FlightRankingEngine.rank_flights(tool_result["flights"])
+                            explicit_airline = (
+                                tc.arguments.get("preferred_airline")
+                                or current_state.preferred_airline
+                            )
+                            tool_result["flights"] = FlightRankingEngine.rank_flights(
+                                tool_result["flights"],
+                                user_preferences=current_preferences,
+                                explicit_query_airline=explicit_airline,
+                            )
                         recommended_flights = tool_result["flights"]
                     elif "flight" in tool_result and isinstance(tool_result["flight"], dict):
                         recommended_flights = [tool_result["flight"]]

@@ -54,9 +54,9 @@ This checklist tracks tasks across the 10 implementation phases.
 - [x] Test RAG policy answers against ungrounded hallucinations (`2026-09-06`)
 
 ## Phase 8: Short-Term Memory & User Preferences
-- [ ] Implement conversation message history store in PostgreSQL
-- [ ] Implement user preference store (preferred cabin, preferred airlines, non-stop preference)
-- [ ] Inject user preferences into flight ranking pipeline while respecting explicit user query overrides
+- [x] Implement conversation message history store in PostgreSQL (`2026-09-06`)
+- [x] Implement user preference store (preferred cabin, preferred airlines, non-stop preference) (`2026-09-06`)
+- [x] Inject user preferences into flight ranking pipeline while respecting explicit user query overrides (`2026-09-06`)
 
 ## Phase 9: Real-Time SSE Streaming & Observability Trace
 - [ ] Implement SSE endpoint (`GET /api/v1/chat/{session_id}/stream`) sending `tool_start`, `tool_result`, `assistant_message`

@@ -11,6 +11,7 @@ import app.database.models  # Ensure models are imported for metadata creation
 from app.api.flights import router as flights_router
 from app.api.bookings import router as bookings_router
 from app.api.agent import router as agent_router
+from app.api.users import router as users_router
 
 # Configure centralized stdout logging
 logging.basicConfig(
@@ -52,6 +53,7 @@ app.add_middleware(
 app.include_router(flights_router, prefix=settings.API_V1_PREFIX)
 app.include_router(bookings_router, prefix=settings.API_V1_PREFIX)
 app.include_router(agent_router, prefix=settings.API_V1_PREFIX)
+app.include_router(users_router, prefix=settings.API_V1_PREFIX)
 
 
 
