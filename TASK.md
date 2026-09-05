@@ -36,16 +36,16 @@ This checklist tracks tasks across the 10 implementation phases.
 - [x] Connect Flutter `AssistantController` to `POST /api/v1/agent/chat` with tool badges & state synchronization (`2026-09-05`)
 
 ## Phase 5: Conversational Search & State Refinement
-- [ ] Implement state retention logic to preserve origin/destination/dates during filter updates
-- [ ] Support queries like "Show cheaper options", "Only non-stop", "What about tomorrow?"
-- [ ] Implement flight comparison tool and Flutter side-by-side comparison table widget
-- [ ] Implement deterministic + LLM explanation ranking engine
+- [x] Implement state retention logic to preserve origin/destination/dates during filter updates (`2026-09-06`)
+- [x] Support queries like "Show cheaper options", "Only non-stop", "What about tomorrow?" (`2026-09-06`)
+- [x] Implement flight comparison tool and Flutter side-by-side comparison table widget (`2026-09-06`)
+- [x] Implement deterministic + LLM explanation ranking engine (`2026-09-06`)
 
 ## Phase 6: Booking Agent & Human-in-the-Loop Dialogs
-- [ ] Add pre-booking availability re-check (`check_availability`) and live fare breakdown (`calculate_fare`)
-- [ ] Build Human-in-the-Loop confirmation workflow requiring explicit user approval
-- [ ] Implement `POST /api/v1/bookings/{id}/confirm` backend handler and Flutter confirmation modal dialog
-- [ ] Test price change handling during pre-booking check
+- [x] Add pre-booking availability re-check (`check_availability`) and live fare breakdown (`calculate_fare`) (`2026-09-06`)
+- [x] Build Human-in-the-Loop confirmation workflow requiring explicit user approval (`2026-09-06`)
+- [x] Implement `POST /api/v1/bookings/{id}/confirm` backend handler and Flutter confirmation modal dialog (`2026-09-06`)
+- [x] Test price change handling during pre-booking check (`2026-09-06`)
 
 ## Phase 7: Travel Policy RAG Component
 - [ ] Add markdown policy documents (`airline_baggage_policy.md`, `cancellation_policy.md`, `refund_policy.md`)
@@ -74,3 +74,4 @@ This checklist tracks tasks across the 10 implementation phases.
 *New sub-tasks, edge cases, or refactoring tasks identified during implementation will be added below with timestamps.*
 
 - [x] Resilient flight lookup: Support lookup by both primary UUID (`id`) and flight number (e.g. `AI-559`) in `FlightRepository` so users and LLM agents can query fare breakdown and availability seamlessly (`2026-09-05`)
+- [x] Multi-turn dialog context & booking intent priority: Transmit recent chat history from Flutter to backend orchestrator, ensure booking intent directly triggers `create_booking` on active flights without redundant checks, and suppress comparison sheet popups during booking requests (`2026-09-06`)

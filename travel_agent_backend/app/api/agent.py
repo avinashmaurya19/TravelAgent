@@ -1,6 +1,6 @@
 """API endpoints for agent intent recognition and natural language dialog orchestration."""
 
-from typing import Optional
+from typing import Optional, List, Dict, Any
 from fastapi import APIRouter, Depends, status
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
@@ -10,6 +10,7 @@ from app.agent.intents import AgentIntent
 from app.agent.intent_engine import IntentEngine
 from app.agent.state import TravelState
 from app.agent.agent import AgentOrchestrator, AgentResult
+from app.llm.base import ChatMessage
 
 router = APIRouter(prefix="/agent", tags=["Agent & Intent Engine"])
 
@@ -28,6 +29,10 @@ class AgentChatRequest(BaseModel):
     message: str = Field(..., description="User chat message or instruction", min_length=1)
     session_id: Optional[str] = Field(default=None, description="Optional session/conversation ID")
     state: Optional[TravelState] = Field(default=None, description="Current structured travel state from client")
+    chat_history: Optional[List[Dict[str, str]]] = Field(
+        default=None,
+        description="Prior conversation message turns [{'role': 'user'|'assistant', 'content': '...'}]",
+    )
 
 
 @router.post(
@@ -60,9 +65,17 @@ def chat_with_agent(
     logger.info("Received user prompt: '%s' | existing state: %s", req.message, req.state)
     orchestrator = AgentOrchestrator(db=db)
     try:
+        history_msgs: Optional[List[ChatMessage]] = None
+        if req.chat_history:
+            history_msgs = [
+                ChatMessage(role=m.get("role", "user"), content=m.get("content", ""))
+                for m in req.chat_history
+                if m.get("content")
+            ]
         result = orchestrator.run(
             user_message=req.message,
             state=req.state,
+            chat_history=history_msgs,
         )
         logger.info("Agent completed turn (tools executed: %d, response length: %d chars)", len(result.tool_trace), len(result.response))
         return result

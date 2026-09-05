@@ -8,16 +8,18 @@ class AgentRepository {
 
   AgentRepository({required this.apiClient});
 
-  /// Submit a user prompt to the AgentOrchestrator loop with conversational state.
+  /// Submit a user prompt to the AgentOrchestrator loop with conversational state and prior message history.
   Future<AgentChatResponse> chatWithAgent({
     required String message,
     TravelStateModel? state,
     String? sessionId,
+    List<Map<String, String>>? chatHistory,
   }) async {
     final payload = <String, dynamic>{
       'message': message,
       'session_id': ?sessionId,
       'state': ?state?.toJson(),
+      'chat_history': ?chatHistory,
     };
 
     final response = await apiClient.post<Map<String, dynamic>>(

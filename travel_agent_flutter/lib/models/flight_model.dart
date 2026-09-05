@@ -15,6 +15,9 @@ class FlightModel {
   final String cabinClass;
   final double price;
   final int availableSeats;
+  final String? badge;
+  final String? rankingExplanation;
+  final double? rankingScore;
 
   const FlightModel({
     required this.id,
@@ -30,6 +33,9 @@ class FlightModel {
     this.cabinClass = 'economy',
     required this.price,
     this.availableSeats = 100,
+    this.badge,
+    this.rankingExplanation,
+    this.rankingScore,
   });
 
   factory FlightModel.fromJson(Map<String, dynamic> json) {
@@ -47,6 +53,9 @@ class FlightModel {
       cabinClass: json['cabin_class'] as String? ?? 'economy',
       price: (json['price'] as num).toDouble(),
       availableSeats: json['available_seats'] as int? ?? 100,
+      badge: json['badge'] as String?,
+      rankingExplanation: json['ranking_explanation'] as String?,
+      rankingScore: (json['ranking_score'] as num?)?.toDouble(),
     );
   }
 
@@ -65,6 +74,9 @@ class FlightModel {
       'cabin_class': cabinClass,
       'price': price,
       'available_seats': availableSeats,
+      'badge': badge,
+      'ranking_explanation': rankingExplanation,
+      'ranking_score': rankingScore,
     };
   }
 

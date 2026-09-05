@@ -10,6 +10,7 @@ from .filtering import filter_flights_tool
 from .availability import check_availability_tool
 from .fare import calculate_fare_tool
 from .booking import create_booking_tool
+from .comparison import compare_flights_tool
 
 logger = logging.getLogger(__name__)
 
@@ -21,6 +22,7 @@ AVAILABLE_TOOLS: Dict[str, Callable[[Session, Dict[str, Any]], Dict[str, Any]]] 
     "check_availability": check_availability_tool,
     "calculate_fare": calculate_fare_tool,
     "create_booking": create_booking_tool,
+    "compare_flights": compare_flights_tool,
 }
 
 # OpenAI/Mistral Function Calling Tool Schemas
@@ -178,6 +180,24 @@ TOOL_SCHEMAS: List[Dict[str, Any]] = [
                     "contact_phone": {"type": "string"},
                 },
                 "required": ["flight_id", "passengers"],
+            },
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "compare_flights",
+            "description": "Perform side-by-side comparison of 2 to 4 flights evaluating price difference, flight duration, and stops.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "flight_ids": {
+                        "type": "array",
+                        "items": {"type": "string"},
+                        "description": "List of 2 to 4 flight UUIDs or flight numbers (e.g. ['6E-204', 'AI-802']) to compare",
+                    },
+                },
+                "required": ["flight_ids"],
             },
         },
     },

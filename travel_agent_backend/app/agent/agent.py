@@ -11,6 +11,7 @@ from app.llm.base import LLMInterface, ChatMessage
 from app.llm.mistral import MistralLLM
 from .state import TravelState
 from .tools.registry import TOOL_SCHEMAS, execute_tool
+from app.services.ranking_service import FlightRankingEngine
 
 logger = logging.getLogger(__name__)
 
@@ -18,12 +19,18 @@ AGENT_SYSTEM_PROMPT = """You are TravelAgent AI, an intelligent, helpful, and pr
 You help users search for flights, filter results, inspect fare breakdowns, and initiate bookings across top Indian routes (DEL, BOM, BLR, GOI, CCU, HYD, MAA, PNQ, etc.).
 
 Strict Operational Guidelines:
-1. Tool-Gated Actions: NEVER make up or hallucinate flight schedules, flight numbers, or ticket fares. You MUST call deterministic tools ('search_flights', 'filter_flights', 'check_availability', 'calculate_fare', 'create_booking') to query real inventory when the user wants to search, compare, inspect, or book flights.
+1. Tool-Gated Actions: NEVER make up or hallucinate flight schedules, flight numbers, or ticket fares. You MUST call deterministic tools ('search_flights', 'filter_flights', 'get_flight_details', 'compare_flights', 'check_availability', 'calculate_fare', 'create_booking') to query real inventory when the user wants to search, compare, inspect, or book flights.
 2. Informational & Guide Queries: If the user asks general questions (such as how the booking process works, how to use the assistant, travel guides, or greetings) without asking to search for flights between specific cities, answer helpfully in natural language text. DO NOT call 'search_flights' unless the user is actively requesting flight options.
 3. Parameter Extraction: Extract 3-letter IATA airport codes (e.g. Delhi -> DEL, Mumbai -> BOM, Bangalore -> BLR, Goa -> GOI).
-4. Conversational Refinement: Retain origin, destination, and dates across turns when users ask for "cheaper options", "only non-stop", or "IndiGo flights".
-5. Safe Booking: Creating a booking produces a PENDING reservation. Inform the user of their PNR reference and total fare, and explain that confirmation is required.
-6. Format: Be concise, clear, and friendly. Quote prices in Indian Rupees (₹).
+4. Conversational Refinement: Retain origin, destination, and dates across turns when users ask for "cheaper options", "only non-stop", "compare top flights", or "IndiGo flights".
+5. Booking & Safe Confirmation (Human-in-the-Loop):
+   - When the user asks to book (e.g. 'book this', 'please book', or provides passenger details like name, age, phone):
+     a) Flight Selection: If user doesn't state a flight number, use the top/recommended flight from ActiveSearchResults (or previously discussed flight).
+     b) Passenger Details: Extract first_name, last_name, age, gender, contact_phone, contact_email. Default email to 'guest@travelagent.ai' and phone to '9999999999' if omitted. DO NOT stop the booking process to ask for email if passenger name and age are provided.
+     c) Tool Execution: Call 'create_booking' directly. DO NOT call 'compare_flights', 'check_availability', or 'calculate_fare' when the user has already requested to book!
+     d) Human-in-the-Loop: Inform the user of their PNR reference and total fare, and instruct them that their pending booking requires explicit confirmation via the modal dialog. Never state that ticket issuance is finalized.
+6. Comparison Tool Restriction: Call 'compare_flights' ONLY when the user explicitly requests to compare flight options (e.g. 'compare flights', 'what is the difference'). NEVER invoke 'compare_flights' when the user wants to book.
+7. Format: Be concise, clear, and friendly. Quote prices in Indian Rupees (₹).
 """
 
 
@@ -90,6 +97,8 @@ class AgentOrchestrator:
                 f"Budget={current_state.max_price or 'None'}, "
                 f"Stops={current_state.max_stops if current_state.max_stops is not None else 'Any'}"
             )
+            if current_state.last_search_flight_ids:
+                state_ctx += f", ActiveSearchResults={current_state.last_search_flight_ids[:4]}"
             messages.append(ChatMessage(role="system", content=state_ctx))
 
         # Append prior chat history if present
@@ -146,8 +155,10 @@ class AgentOrchestrator:
                     # Update travel state from tool arguments and results
                     self._update_state(current_state, tc.name, tc.arguments, tool_result)
 
-                    # Extract flight objects to return to UI cards
+                    # Extract flight objects to return to UI cards and apply ranking
                     if "flights" in tool_result and isinstance(tool_result["flights"], list):
+                        if tc.name in ("search_flights", "filter_flights"):
+                            tool_result["flights"] = FlightRankingEngine.rank_flights(tool_result["flights"])
                         recommended_flights = tool_result["flights"]
                     elif "flight" in tool_result and isinstance(tool_result["flight"], dict):
                         recommended_flights = [tool_result["flight"]]
@@ -221,3 +232,9 @@ class AgentOrchestrator:
             if result.get("status") == "pending_confirmation":
                 state.booking_id = result.get("booking_id")
                 state.booking_reference = result.get("booking_reference")
+                if "flight" in result and isinstance(result["flight"], dict):
+                    state.selected_flight_id = result["flight"].get("id")
+
+        elif tool_name == "compare_flights":
+            if result.get("status") == "success" and "flights" in result:
+                state.last_search_flight_ids = [f["id"] for f in result["flights"] if "id" in f]

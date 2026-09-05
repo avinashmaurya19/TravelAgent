@@ -61,12 +61,14 @@ class BookingService:
         return booking
 
     def get_booking(self, booking_id: str) -> BookingModel:
-        """Fetch booking by ID or raise 404."""
+        """Fetch booking by UUID or PNR reference, or raise 404."""
         booking = self.booking_repo.get_by_id(booking_id)
+        if not booking:
+            booking = self.booking_repo.get_by_reference(booking_id)
         if not booking:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"Booking with ID {booking_id} not found",
+                detail=f"Booking with ID or Reference '{booking_id}' not found",
             )
         return booking
 
@@ -98,7 +100,7 @@ class BookingService:
                 detail="Failed to allocate seats for booking confirmation",
             )
 
-        confirmed_booking = self.booking_repo.confirm_booking(booking_id)
+        confirmed_booking = self.booking_repo.confirm_booking(booking.id)
         return confirmed_booking
 
     def cancel_booking(self, booking_id: str) -> Dict[str, Any]:
@@ -117,7 +119,7 @@ class BookingService:
         if was_confirmed:
             self.flight_repo.increment_seats(booking.flight_id, booking.passengers_count)
 
-        self.booking_repo.cancel_booking(booking_id)
+        self.booking_repo.cancel_booking(booking.id)
 
         # Fixed cancellation fee calculation (e.g., ₹1500 per pax if confirmed)
         cancellation_fee = 1500.0 * booking.passengers_count if was_confirmed else 0.0

@@ -1,7 +1,7 @@
 """Pydantic schemas for Booking creation, confirmation, and management."""
 
 from datetime import datetime
-from typing import Optional, List
+from typing import Optional, List, Any
 from pydantic import BaseModel, Field, EmailStr, ConfigDict
 from app.schemas.flight import FlightResponse
 
@@ -9,9 +9,9 @@ from app.schemas.flight import FlightResponse
 class PassengerSchema(BaseModel):
     """Passenger details schema."""
     first_name: str = Field(..., min_length=1, max_length=100, description="Passenger first name")
-    last_name: str = Field(..., min_length=1, max_length=100, description="Passenger last name")
+    last_name: str = Field(default="", max_length=100, description="Passenger last name")
     age: int = Field(..., ge=1, le=120, description="Passenger age")
-    gender: str = Field(..., description="Gender (e.g., Male, Female, Other)")
+    gender: str = Field(default="Other", description="Gender (e.g., Male, Female, Other)")
     seat_number: Optional[str] = Field(default=None, description="Assigned seat code, e.g. 12A")
 
     model_config = ConfigDict(from_attributes=True)
@@ -22,13 +22,20 @@ PassengerCreate = PassengerSchema
 
 class BookingCreateRequest(BaseModel):
     """Request schema for initiating a pending flight booking."""
-    flight_id: str = Field(..., description="Target flight UUID")
+    flight_id: str = Field(..., description="Target flight UUID or flight number")
     user_id: Optional[str] = Field(default=None, description="Optional associated user UUID")
-    contact_email: EmailStr = Field(..., description="Primary contact email for e-ticket")
-    contact_phone: str = Field(..., min_length=10, max_length=15, description="Primary contact phone number")
+    contact_email: EmailStr = Field(default="guest@travelagent.ai", description="Primary contact email for e-ticket")
+    contact_phone: str = Field(default="9999999999", min_length=10, max_length=15, description="Primary contact phone number")
     passengers: List[PassengerSchema] = Field(..., min_length=1, max_length=9, description="List of passengers")
     add_extra_baggage: bool = Field(default=False, description="Add 15kg extra baggage")
     seat_selection_tier: Optional[str] = Field(default="standard", description="standard, extra_legroom, premium")
+    seat_selection: Optional[str] = Field(default=None, description="Alias for seat_selection_tier")
+
+    model_config = ConfigDict(populate_by_name=True)
+
+    def model_post_init(self, __context: Any) -> None:
+        if self.seat_selection and self.seat_selection_tier in ("standard", None):
+            self.seat_selection_tier = self.seat_selection
 
 
 class BookingConfirmRequest(BaseModel):

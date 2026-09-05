@@ -16,6 +16,8 @@ class BookingConfirmSheet extends StatefulWidget {
   final bool addExtraBaggage;
   final String seatSelection;
   final int passengersCount;
+  final BookingModel? initialPendingBooking;
+  final String? initialPassengerName;
 
   const BookingConfirmSheet({
     super.key,
@@ -23,6 +25,8 @@ class BookingConfirmSheet extends StatefulWidget {
     this.addExtraBaggage = false,
     this.seatSelection = 'standard',
     this.passengersCount = 1,
+    this.initialPendingBooking,
+    this.initialPassengerName,
   });
 
   @override
@@ -51,7 +55,12 @@ class _BookingConfirmSheetState extends State<BookingConfirmSheet> {
   @override
   void initState() {
     super.initState();
-    _preFlightCheck();
+    if (widget.initialPendingBooking != null) {
+      _pendingBooking = widget.initialPendingBooking;
+      _isChecking = false;
+    } else {
+      _preFlightCheck();
+    }
   }
 
   @override
@@ -183,7 +192,7 @@ class _BookingConfirmSheetState extends State<BookingConfirmSheet> {
               ? BookingPendingView(
                   booking: _pendingBooking!,
                   flight: widget.flight,
-                  passengerName: '${_firstNameController.text} ${_lastNameController.text}',
+                  passengerName: widget.initialPassengerName ?? '${_firstNameController.text} ${_lastNameController.text}',
                   isSubmitting: _isSubmitting,
                   errorMessage: _errorMessage,
                   onConfirm: _confirmBooking,

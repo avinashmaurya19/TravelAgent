@@ -37,7 +37,7 @@ class FlightCard extends StatelessWidget {
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            // Top Row: Airline & Flight Number + Cabin Class
+            // Top Row: Airline & Flight Number + Badge & Cabin Class
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -81,18 +81,84 @@ class FlightCard extends StatelessWidget {
                     ),
                   ],
                 ),
-                Text(
-                  flight.cabinClass.toUpperCase(),
-                  style: const TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.textSecondary,
-                    letterSpacing: 0.5,
-                  ),
+                Row(
+                  children: [
+                    if (flight.badge != null) ...[
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+                        decoration: BoxDecoration(
+                          color: _badgeColor(flight.badge!).withValues(alpha: 0.12),
+                          borderRadius: BorderRadius.circular(6),
+                          border: Border.all(
+                            color: _badgeColor(flight.badge!).withValues(alpha: 0.4),
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              _badgeIcon(flight.badge!),
+                              size: 12,
+                              color: _badgeColor(flight.badge!),
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              flight.badge!,
+                              style: TextStyle(
+                                fontSize: 10,
+                                fontWeight: FontWeight.bold,
+                                color: _badgeColor(flight.badge!),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                    ],
+                    Text(
+                      flight.cabinClass.toUpperCase(),
+                      style: const TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.textSecondary,
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
-            const Divider(height: 24, color: AppColors.border),
+            if (flight.rankingExplanation != null) ...[
+              const SizedBox(height: 8),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: AppColors.toolBadge.withValues(alpha: 0.5),
+                  borderRadius: BorderRadius.circular(6),
+                  border: Border.all(color: AppColors.border.withValues(alpha: 0.6)),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.auto_awesome, size: 12, color: AppColors.primary),
+                    const SizedBox(width: 6),
+                    Expanded(
+                      child: Text(
+                        flight.rankingExplanation!,
+                        style: const TextStyle(
+                          fontSize: 11,
+                          color: AppColors.textSecondary,
+                          fontStyle: FontStyle.italic,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+            const Divider(height: 20, color: AppColors.border),
 
             // Middle Row: Departure, Duration, Arrival
             Row(
@@ -268,5 +334,35 @@ class FlightCard extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Color _badgeColor(String badge) {
+    switch (badge.toLowerCase()) {
+      case 'best overall':
+        return const Color(0xFFE65100);
+      case 'cheapest':
+        return const Color(0xFF2E7D32);
+      case 'fastest':
+        return const Color(0xFF1565C0);
+      case 'non-stop':
+        return const Color(0xFF6A1B9A);
+      default:
+        return AppColors.primary;
+    }
+  }
+
+  IconData _badgeIcon(String badge) {
+    switch (badge.toLowerCase()) {
+      case 'best overall':
+        return Icons.star_rounded;
+      case 'cheapest':
+        return Icons.savings_outlined;
+      case 'fastest':
+        return Icons.bolt_rounded;
+      case 'non-stop':
+        return Icons.sync_alt_rounded;
+      default:
+        return Icons.auto_awesome;
+    }
   }
 }

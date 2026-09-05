@@ -17,6 +17,9 @@ void main() {
       'cabin_class': 'economy',
       'price': 4500.0,
       'available_seats': 80,
+      'badge': 'Best Overall',
+      'ranking_explanation': 'Top composite score across price and duration',
+      'ranking_score': 0.15,
     };
 
     test('parses json correctly into FlightModel', () {
@@ -32,6 +35,9 @@ void main() {
       expect(flight.stopsText, equals('Non-stop'));
       expect(flight.price, equals(4500.0));
       expect(flight.availableSeats, equals(80));
+      expect(flight.badge, equals('Best Overall'));
+      expect(flight.rankingExplanation, equals('Top composite score across price and duration'));
+      expect(flight.rankingScore, equals(0.15));
     });
 
     test('serializes FlightModel to JSON correctly', () {
@@ -42,6 +48,9 @@ void main() {
       expect(json['origin'], equals('DEL'));
       expect(json['destination'], equals('BOM'));
       expect(json['price'], equals(4500.0));
+      expect(json['badge'], equals('Best Overall'));
+      expect(json['ranking_explanation'], equals('Top composite score across price and duration'));
+      expect(json['ranking_score'], equals(0.15));
     });
   });
 

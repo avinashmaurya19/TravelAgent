@@ -6,7 +6,9 @@ import '../../models/chat_message_model.dart';
 import '../../models/flight_model.dart';
 import '../../repositories/agent_repository.dart';
 import '../../repositories/flight_repository.dart';
+import '../../models/booking_model.dart';
 import '../flights/widgets/flight_compare_sheet.dart';
+import '../booking/widgets/booking_confirm_sheet.dart';
 
 /// Controller managing the AI Travel Assistant conversation, agent tool traces, and state.
 class AssistantController extends GetxController {
@@ -115,10 +117,23 @@ class AssistantController extends GetxController {
     final lower = query.toLowerCase();
 
     try {
-      // 1. Send query and current conversational state to Agent Orchestrator
+      // 0. Extract recent non-thinking message history to preserve multi-turn context
+      final historyList = messages
+          .where((m) => !m.isThinking && m.content.trim().isNotEmpty)
+          .map((m) => {
+                'role': m.role == MessageRole.user ? 'user' : 'assistant',
+                'content': m.content,
+              })
+          .toList();
+      final recentHistory = historyList.length > 6
+          ? historyList.sublist(historyList.length - 6)
+          : historyList;
+
+      // 1. Send query, conversational state, and recent history to Agent Orchestrator
       final agentResponse = await agentRepository.chatWithAgent(
         message: query,
         state: travelState,
+        chatHistory: recentHistory,
       );
 
       // 2. Update local state from orchestrator's state
@@ -146,8 +161,11 @@ class AssistantController extends GetxController {
         ),
       );
 
-      // 4. Trigger comparison sheet if user specifically requested comparison
-      if (lower.contains('compare') && lastLoadedFlights.length >= 2) {
+      // 4. Trigger comparison sheet ONLY if user explicitly asked to compare or compare tool was called,
+      // and NEVER when the user is trying to book.
+      final isBookingIntent = lower.contains('book') || lower.contains('confirm') || lower.contains('pnr');
+      final hasCompareTool = agentResponse.toolTrace.any((t) => t.toolName == 'compare_flights');
+      if (!isBookingIntent && (lower.contains('compare') || hasCompareTool) && lastLoadedFlights.length >= 2) {
         Get.bottomSheet(
           FlightCompareSheet(flights: lastLoadedFlights.take(3).toList()),
           isScrollControlled: true,
@@ -156,6 +174,53 @@ class AssistantController extends GetxController {
             borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
           ),
         );
+      }
+
+      // 5. Trigger booking confirmation sheet if create_booking tool was invoked
+      ToolCallTrace? bookingTrace;
+      for (final t in agentResponse.toolTrace) {
+        if (t.toolName == 'create_booking') {
+          bookingTrace = t;
+          break;
+        }
+      }
+
+      if (bookingTrace != null && travelState.bookingId != null) {
+        final bookingId = travelState.bookingId!;
+        final bookingRef = travelState.bookingReference ?? '';
+        final flight = agentResponse.recommendedFlights.isNotEmpty
+            ? agentResponse.recommendedFlights.first
+            : (lastLoadedFlights.isNotEmpty ? lastLoadedFlights.first : null);
+
+        if (flight != null) {
+          final pendingModel = BookingModel(
+            id: bookingId,
+            bookingReference: bookingRef,
+            flightId: flight.id,
+            status: BookingStatus.pending,
+            baseFare: (bookingTrace.result['base_fare'] as num?)?.toDouble() ?? flight.price,
+            taxAmount: (bookingTrace.result['tax_amount'] as num?)?.toDouble() ?? (flight.price * 0.18),
+            baggageFee: (bookingTrace.result['baggage_fee'] as num?)?.toDouble() ?? 0.0,
+            seatFee: (bookingTrace.result['seat_fee'] as num?)?.toDouble() ?? 0.0,
+            totalPrice: (bookingTrace.result['total_price'] as num?)?.toDouble() ?? (flight.price * 1.18),
+            passengersCount: (bookingTrace.result['passengers_count'] as int?) ?? 1,
+            createdAt: DateTime.now(),
+            flight: flight,
+          );
+
+          Get.bottomSheet(
+            BookingConfirmSheet(
+              flight: flight,
+              initialPendingBooking: pendingModel,
+              initialPassengerName: travelState.passengerDetails?['name'] ?? 'Passenger',
+            ),
+            isScrollControlled: true,
+            backgroundColor: Colors.white,
+            shape: const RoundedRectangleBorder(
+              borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+            ),
+          );
+        }
       }
     } catch (e) {
       // Graceful fallback to deterministic local search if backend agent fails
