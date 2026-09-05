@@ -21,11 +21,11 @@ This checklist tracks tasks across the 10 implementation phases.
 - [x] Create Flight Details modal sheet, Comparison view, and Booking Summary screen (`2026-09-05`)
 
 ## Phase 3: LLM Integration & Structured Intent Engine
-- [ ] Implement abstract `LLMInterface` class (`app/llm/base.py`)
-- [ ] Add `MistralLLM` provider implementation (`app/llm/mistral.py`)
-- [ ] Add `HuggingFaceLLM` provider implementation (`app/llm/huggingface.py`)
-- [ ] Create Pydantic schemas for `AgentIntent` and parameter extraction
-- [ ] Test intent recognition across sample user prompts
+- [x] Implement abstract `LLMInterface` class (`app/llm/base.py`) (`2026-09-05`)
+- [x] Add `MistralLLM` provider implementation (`app/llm/mistral.py`) (`2026-09-05`)
+- [x] Add `HuggingFaceLLM` provider implementation (`app/llm/huggingface.py`) (`2026-09-05`)
+- [x] Create Pydantic schemas for `AgentIntent` and parameter extraction (`2026-09-05`)
+- [x] Test intent recognition across sample user prompts (`2026-09-05`)
 
 ## Phase 4: Agent Orchestrator & Tool Calling Loop
 - [ ] Define `TravelState` Pydantic model for maintaining structured travel request context

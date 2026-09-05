@@ -14,6 +14,13 @@ class Settings(BaseSettings):
     ENVIRONMENT: str = "development"
     CORS_ORIGINS: Union[List[str], str] = ["*"]
 
+    # LLM Provider Configuration
+    LLM_PROVIDER: str = "mistral"  # "mistral" or "huggingface"
+    MISTRAL_API_KEY: str = "random_mistral_api_key_placeholder"
+    MISTRAL_MODEL: str = "open-mistral-nemo"
+    HUGGINGFACE_API_KEY: Union[str, None] = None
+    HUGGINGFACE_MODEL: str = "mistralai/Mistral-7B-Instruct-v0.3"
+
     @field_validator("CORS_ORIGINS", mode="before")
     @classmethod
     def assemble_cors_origins(cls, v: Union[str, List[str]]) -> List[str]:

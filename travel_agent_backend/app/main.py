@@ -9,6 +9,8 @@ from app.database.session import engine, Base
 import app.database.models  # Ensure models are imported for metadata creation
 from app.api.flights import router as flights_router
 from app.api.bookings import router as bookings_router
+from app.api.agent import router as agent_router
+
 
 
 @asynccontextmanager
@@ -41,6 +43,8 @@ app.add_middleware(
 # Include API Routers
 app.include_router(flights_router, prefix=settings.API_V1_PREFIX)
 app.include_router(bookings_router, prefix=settings.API_V1_PREFIX)
+app.include_router(agent_router, prefix=settings.API_V1_PREFIX)
+
 
 
 @app.get("/health", tags=["Health"])
