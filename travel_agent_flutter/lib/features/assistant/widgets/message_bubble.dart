@@ -20,11 +20,8 @@ class MessageBubble extends StatelessWidget {
         crossAxisAlignment: isUser ? CrossAxisAlignment.end : CrossAxisAlignment.start,
         children: [
           // Tool Trace Badges if present (Shows agent reasoning/tool action)
-          if (message.allTraces.isNotEmpty) ...[
-            for (final trace in message.allTraces)
-              _buildToolTraceBadge(trace),
-            const SizedBox(height: 6),
-          ],
+          if (message.allTraces.isNotEmpty)
+            _buildToolTraces(message.allTraces),
 
           // Bubble Container
           Row(
@@ -117,36 +114,57 @@ class MessageBubble extends StatelessWidget {
     );
   }
 
-  Widget _buildToolTraceBadge(ToolCallTrace trace) {
-    return Container(
-      margin: const EdgeInsets.only(left: 36, bottom: 4),
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-      decoration: BoxDecoration(
-        color: AppColors.toolBadge,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: AppColors.border),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const Icon(Icons.build_circle_outlined, size: 14, color: AppColors.toolBadgeText),
-          const SizedBox(width: 6),
-          Text(
-            'Executed: ${trace.toolName}',
-            style: const TextStyle(
-              fontSize: 11,
-              fontWeight: FontWeight.w600,
-              color: AppColors.toolBadgeText,
+  Widget _buildToolTraces(List<ToolCallTrace> traces) {
+    // Group traces by toolName to avoid vertical UI clutter
+    final Map<String, List<ToolCallTrace>> grouped = {};
+    for (final trace in traces) {
+      grouped.putIfAbsent(trace.toolName, () => []).add(trace);
+    }
+
+    return Padding(
+      padding: const EdgeInsets.only(left: 36, bottom: 6),
+      child: Wrap(
+        spacing: 6,
+        runSpacing: 4,
+        children: grouped.entries.map((entry) {
+          final toolName = entry.key;
+          final toolTraces = entry.value;
+          final count = toolTraces.length;
+          final totalMs = toolTraces.fold<int>(
+            0,
+            (sum, t) => sum + (t.executionTimeMs ?? 0),
+          );
+
+          final label = count > 1
+              ? 'Executed: $toolName ($count queries • ${totalMs}ms)'
+              : (toolTraces.first.executionTimeMs != null
+                  ? 'Executed: $toolName (${toolTraces.first.executionTimeMs}ms)'
+                  : 'Executed: $toolName');
+
+          return Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+            decoration: BoxDecoration(
+              color: AppColors.toolBadge,
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: AppColors.border),
             ),
-          ),
-          if (trace.executionTimeMs != null) ...[
-            const SizedBox(width: 6),
-            Text(
-              '(${trace.executionTimeMs}ms)',
-              style: const TextStyle(fontSize: 10, color: AppColors.textSecondary),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.build_circle_outlined, size: 14, color: AppColors.toolBadgeText),
+                const SizedBox(width: 6),
+                Text(
+                  label,
+                  style: const TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.toolBadgeText,
+                  ),
+                ),
+              ],
             ),
-          ],
-        ],
+          );
+        }).toList(),
       ),
     );
   }

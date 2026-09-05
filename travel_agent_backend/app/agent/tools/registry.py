@@ -11,6 +11,7 @@ from .availability import check_availability_tool
 from .fare import calculate_fare_tool
 from .booking import create_booking_tool
 from .comparison import compare_flights_tool
+from .policy import search_travel_policy_tool
 
 logger = logging.getLogger(__name__)
 
@@ -23,6 +24,7 @@ AVAILABLE_TOOLS: Dict[str, Callable[[Session, Dict[str, Any]], Dict[str, Any]]] 
     "calculate_fare": calculate_fare_tool,
     "create_booking": create_booking_tool,
     "compare_flights": compare_flights_tool,
+    "search_travel_policy": search_travel_policy_tool,
 }
 
 # OpenAI/Mistral Function Calling Tool Schemas
@@ -198,6 +200,28 @@ TOOL_SCHEMAS: List[Dict[str, Any]] = [
                     },
                 },
                 "required": ["flight_ids"],
+            },
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "search_travel_policy",
+            "description": "Retrieve airline policy rules and regulations regarding baggage allowances, cancellation charges, refund timelines, and airline disruptions.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "query": {
+                        "type": "string",
+                        "description": "User question or keywords about baggage, cancellation, refund, or airline rules",
+                    },
+                    "top_k": {
+                        "type": "integer",
+                        "description": "Number of relevant policy sections to retrieve (default 3)",
+                        "default": 3,
+                    },
+                },
+                "required": ["query"],
             },
         },
     },

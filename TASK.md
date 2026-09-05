@@ -48,10 +48,10 @@ This checklist tracks tasks across the 10 implementation phases.
 - [x] Test price change handling during pre-booking check (`2026-09-06`)
 
 ## Phase 7: Travel Policy RAG Component
-- [ ] Add markdown policy documents (`airline_baggage_policy.md`, `cancellation_policy.md`, `refund_policy.md`)
-- [ ] Build FAISS vector store indexer using Sentence Transformers
-- [ ] Implement `search_travel_policy` tool for answering policy questions with grounded retrieval
-- [ ] Test RAG policy answers against ungrounded hallucinations
+- [x] Add markdown policy documents (`airline_baggage_policy.md`, `cancellation_policy.md`, `refund_policy.md`) (`2026-09-06`)
+- [x] Build FAISS vector store indexer using Sentence Transformers (`2026-09-06`)
+- [x] Implement `search_travel_policy` tool for answering policy questions with grounded retrieval (`2026-09-06`)
+- [x] Test RAG policy answers against ungrounded hallucinations (`2026-09-06`)
 
 ## Phase 8: Short-Term Memory & User Preferences
 - [ ] Implement conversation message history store in PostgreSQL
@@ -75,3 +75,4 @@ This checklist tracks tasks across the 10 implementation phases.
 
 - [x] Resilient flight lookup: Support lookup by both primary UUID (`id`) and flight number (e.g. `AI-559`) in `FlightRepository` so users and LLM agents can query fare breakdown and availability seamlessly (`2026-09-05`)
 - [x] Multi-turn dialog context & booking intent priority: Transmit recent chat history from Flutter to backend orchestrator, ensure booking intent directly triggers `create_booking` on active flights without redundant checks, and suppress comparison sheet popups during booking requests (`2026-09-06`)
+- [x] Open-ended search refinement & badge aggregation: Cap destination fan-out in `AGENT_SYSTEM_PROMPT` to top 2–3 destinations when query specifies "anywhere", and aggregate multiple tool call traces into a single horizontal badge chip in Flutter `MessageBubble` (`2026-09-06`)

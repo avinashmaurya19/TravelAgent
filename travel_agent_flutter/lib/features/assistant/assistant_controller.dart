@@ -31,7 +31,8 @@ class AssistantController extends GetxController {
     'Show cheaper flights',
     'Only non-stop flights',
     'Compare top 2 flights',
-    'What about Air India?',
+    'What is IndiGo baggage limit?',
+    'What is the cancellation fee?',
   ];
 
   @override
