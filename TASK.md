@@ -28,11 +28,12 @@ This checklist tracks tasks across the 10 implementation phases.
 - [x] Test intent recognition across sample user prompts (`2026-09-05`)
 
 ## Phase 4: Agent Orchestrator & Tool Calling Loop
-- [ ] Define `TravelState` Pydantic model for maintaining structured travel request context
-- [ ] Implement Python tool functions: `search_flights`, `filter_flights`, `get_flight_details`, `check_availability`, `calculate_fare`, `create_booking`
-- [ ] Build core `while True` agent execution loop in `app/agent/agent.py`
-- [ ] Add argument validation using Pydantic schemas and tool execution exception handling
-- [ ] Test end-to-end flight search tool invocation via agent loop
+- [x] Define `TravelState` Pydantic model for maintaining structured travel request context (`2026-09-05`)
+- [x] Implement Python tool functions: `search_flights`, `filter_flights`, `get_flight_details`, `check_availability`, `calculate_fare`, `create_booking` (`2026-09-05`)
+- [x] Build core `while True` agent execution loop in `app/agent/agent.py` (`2026-09-05`)
+- [x] Add argument validation using Pydantic schemas and tool execution exception handling (`2026-09-05`)
+- [x] Test end-to-end flight search tool invocation via agent loop (`2026-09-05`)
+- [x] Connect Flutter `AssistantController` to `POST /api/v1/agent/chat` with tool badges & state synchronization (`2026-09-05`)
 
 ## Phase 5: Conversational Search & State Refinement
 - [ ] Implement state retention logic to preserve origin/destination/dates during filter updates

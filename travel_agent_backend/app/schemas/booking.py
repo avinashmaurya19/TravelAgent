@@ -17,6 +17,9 @@ class PassengerSchema(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
+PassengerCreate = PassengerSchema
+
+
 class BookingCreateRequest(BaseModel):
     """Request schema for initiating a pending flight booking."""
     flight_id: str = Field(..., description="Target flight UUID")

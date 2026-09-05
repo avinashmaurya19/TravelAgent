@@ -19,9 +19,10 @@ class MessageBubble extends StatelessWidget {
       child: Column(
         crossAxisAlignment: isUser ? CrossAxisAlignment.end : CrossAxisAlignment.start,
         children: [
-          // Tool Trace Badge if present (Shows agent reasoning/tool action)
-          if (message.toolTrace != null) ...[
-            _buildToolTraceBadge(message.toolTrace!),
+          // Tool Trace Badges if present (Shows agent reasoning/tool action)
+          if (message.allTraces.isNotEmpty) ...[
+            for (final trace in message.allTraces)
+              _buildToolTraceBadge(trace),
             const SizedBox(height: 6),
           ],
 

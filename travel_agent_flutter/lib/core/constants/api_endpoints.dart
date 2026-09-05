@@ -33,6 +33,10 @@ class ApiEndpoints {
   static const String confirmBooking = '/bookings/{id}/confirm';
   static const String cancelBooking = '/bookings/{id}/cancel';
 
+  // Agent
+  static const String agentChat = '/agent/chat';
+  static const String agentIntent = '/agent/intent';
+
   // Health
   static const String health = '/health';
 }

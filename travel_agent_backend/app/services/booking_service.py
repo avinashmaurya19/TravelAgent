@@ -46,7 +46,7 @@ class BookingService:
         passengers_data = [p.model_dump() for p in req.passengers]
 
         booking = self.booking_repo.create_pending_booking(
-            flight_id=req.flight_id,
+            flight_id=flight.id,
             base_fare=fare_details["total_base_fare"],
             tax_amount=fare_details["tax_amount"],
             baggage_fee=fare_details["baggage_fee"],

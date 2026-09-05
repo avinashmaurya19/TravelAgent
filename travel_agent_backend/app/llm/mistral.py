@@ -108,6 +108,15 @@ class MistralLLM(LLMInterface):
                 model=f"{self.model}-mock",
             )
 
+        # If a tool was already executed in a previous turn, summarize and end turn
+        has_tool_result = any(m.role == "tool" for m in messages)
+        if has_tool_result:
+            return LLMResponse(
+                content="Here are the best flight options matching your request. Let me know if you would like to filter, compare, or view fare breakdowns!",
+                tool_calls=[],
+                model=f"{self.model}-mock",
+            )
+
         if tools and ("flight" in lower or "search" in lower or "del" in lower):
             # Generate mock search_flights tool call
             return LLMResponse(

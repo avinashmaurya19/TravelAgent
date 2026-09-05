@@ -11,6 +11,7 @@ class ChatMessage(BaseModel):
     content: str = Field(..., description="Text content of the message")
     name: Optional[str] = Field(default=None, description="Optional name identifier")
     tool_call_id: Optional[str] = Field(default=None, description="Tool call ID for tool outputs")
+    tool_calls: Optional[List[Dict[str, Any]]] = Field(default=None, description="List of tool calls if emitted by assistant")
 
     def to_dict(self) -> Dict[str, Any]:
         """Convert message to dictionary for API serialization."""
@@ -19,6 +20,8 @@ class ChatMessage(BaseModel):
             data["name"] = self.name
         if self.tool_call_id:
             data["tool_call_id"] = self.tool_call_id
+        if self.tool_calls:
+            data["tool_calls"] = self.tool_calls
         return data
 
 

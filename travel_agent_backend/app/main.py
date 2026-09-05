@@ -1,5 +1,6 @@
 """FastAPI main application entrypoint."""
 
+import logging
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -10,6 +11,13 @@ import app.database.models  # Ensure models are imported for metadata creation
 from app.api.flights import router as flights_router
 from app.api.bookings import router as bookings_router
 from app.api.agent import router as agent_router
+
+# Configure centralized stdout logging
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
+    datefmt="%H:%M:%S",
+)
 
 
 

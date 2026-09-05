@@ -52,6 +52,7 @@ class ChatMessage {
   final DateTime timestamp;
   final List<FlightModel>? recommendedFlights;
   final ToolCallTrace? toolTrace;
+  final List<ToolCallTrace>? toolTraces;
   final bool isThinking;
 
   const ChatMessage({
@@ -61,13 +62,25 @@ class ChatMessage {
     required this.timestamp,
     this.recommendedFlights,
     this.toolTrace,
+    this.toolTraces,
     this.isThinking = false,
   });
+
+  List<ToolCallTrace> get allTraces {
+    if (toolTraces != null && toolTraces!.isNotEmpty) {
+      return toolTraces!;
+    }
+    if (toolTrace != null) {
+      return [toolTrace!];
+    }
+    return const [];
+  }
 
   ChatMessage copyWith({
     String? content,
     List<FlightModel>? recommendedFlights,
     ToolCallTrace? toolTrace,
+    List<ToolCallTrace>? toolTraces,
     bool? isThinking,
   }) {
     return ChatMessage(
@@ -77,6 +90,7 @@ class ChatMessage {
       timestamp: timestamp,
       recommendedFlights: recommendedFlights ?? this.recommendedFlights,
       toolTrace: toolTrace ?? this.toolTrace,
+      toolTraces: toolTraces ?? this.toolTraces,
       isThinking: isThinking ?? this.isThinking,
     );
   }

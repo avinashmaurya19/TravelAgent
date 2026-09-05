@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'core/network/api_client.dart';
 import 'core/routes/app_pages.dart';
 import 'core/theme/app_theme.dart';
+import 'repositories/agent_repository.dart';
 import 'repositories/booking_repository.dart';
 import 'repositories/flight_repository.dart';
 
@@ -14,6 +15,7 @@ void main() {
   Get.put<ApiClient>(apiClient, permanent: true);
   Get.put<FlightRepository>(FlightRepository(apiClient: apiClient), permanent: true);
   Get.put<BookingRepository>(BookingRepository(apiClient: apiClient), permanent: true);
+  Get.put<AgentRepository>(AgentRepository(apiClient: apiClient), permanent: true);
 
   runApp(const TravelAgentApp());
 }
