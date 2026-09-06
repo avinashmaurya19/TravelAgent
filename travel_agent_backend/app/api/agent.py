@@ -2,6 +2,7 @@
 
 from typing import Optional, List, Dict, Any
 from fastapi import APIRouter, Depends, status
+from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
@@ -147,3 +148,106 @@ def chat_with_agent(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Agent reasoning failed: {str(e)}",
         )
+
+
+@router.post(
+    "/chat/stream",
+    summary="Stream real-time agent reasoning, tool execution, and message tokens via Server-Sent Events (SSE)",
+)
+def chat_with_agent_stream(
+    req: AgentChatRequest,
+    db: Session = Depends(get_db),
+):
+    """Stream real-time agent events (tool_start, tool_result, assistant_message, stream_end) via SSE."""
+    logger.info("Received streaming user prompt: '%s' | existing state: %s | session: %s", req.message, req.state, req.session_id)
+    conv_repo = ConversationRepository(db) if req.session_id else None
+    pref_repo = UserPreferenceRepository(db)
+
+    # 1. Resolve prior chat history
+    history_msgs: Optional[List[ChatMessage]] = None
+    if req.chat_history:
+        history_msgs = [
+            ChatMessage(role=m.get("role", "user"), content=m.get("content", ""))
+            for m in req.chat_history
+            if m.get("content")
+        ]
+    elif conv_repo and req.session_id:
+        stored_msgs = conv_repo.get_recent_messages(req.session_id, limit=12)
+        if stored_msgs:
+            history_msgs = [
+                ChatMessage(role=m.role, content=m.content)
+                for m in stored_msgs
+                if m.role in ("user", "assistant")
+            ]
+
+    # 2. Resolve user preferences
+    user_prefs = None
+    user_id = req.user_id
+    if not user_id and conv_repo and req.session_id:
+        conv = conv_repo.get_or_create_conversation(req.session_id)
+        user_id = conv.user_id
+
+    if user_id:
+        user_prefs = pref_repo.get_preferences_dict(user_id)
+
+    orchestrator = AgentOrchestrator(db=db, user_preferences=user_prefs)
+
+    def event_stream():
+        collected_traces = []
+        assistant_text = ""
+        try:
+            for item in orchestrator.run_stream(
+                user_message=req.message,
+                state=req.state,
+                chat_history=history_msgs,
+                user_preferences=user_prefs,
+            ):
+                event_type = item["event"]
+                payload = json.dumps(item["data"])
+                yield f"event: {event_type}\ndata: {payload}\n\n"
+
+                if event_type == "tool_result":
+                    collected_traces.append(item["data"])
+                elif event_type == "assistant_message":
+                    assistant_text = item["data"].get("response", "")
+
+            # Persist to database if session_id is provided
+            if conv_repo and req.session_id:
+                conv_repo.append_message(
+                    session_id=req.session_id,
+                    role="user",
+                    content=req.message,
+                    user_id=user_id,
+                )
+                for t in collected_traces:
+                    conv_repo.append_message(
+                        session_id=req.session_id,
+                        role="tool",
+                        content=json.dumps(t.get("result", {})),
+                        tool_name=t.get("tool_name"),
+                        tool_args=t.get("arguments"),
+                        tool_result=t.get("result"),
+                        user_id=user_id,
+                    )
+                if assistant_text:
+                    conv_repo.append_message(
+                        session_id=req.session_id,
+                        role="assistant",
+                        content=assistant_text,
+                        user_id=user_id,
+                    )
+        except Exception as exc:
+            logger.error("SSE stream error: %s", exc, exc_info=True)
+            err_data = json.dumps({"error": str(exc)})
+            yield f"event: error\ndata: {err_data}\n\n"
+
+    return StreamingResponse(
+        event_stream(),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive",
+            "X-Accel-Buffering": "no",
+        },
+    )
+

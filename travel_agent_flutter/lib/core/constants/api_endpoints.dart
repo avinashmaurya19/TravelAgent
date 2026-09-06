@@ -35,6 +35,7 @@ class ApiEndpoints {
 
   // Agent
   static const String agentChat = '/agent/chat';
+  static const String agentChatStream = '/agent/chat/stream';
   static const String agentIntent = '/agent/intent';
 
   // Health

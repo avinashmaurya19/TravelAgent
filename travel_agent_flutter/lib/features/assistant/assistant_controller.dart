@@ -9,6 +9,7 @@ import '../../repositories/flight_repository.dart';
 import '../../models/booking_model.dart';
 import '../flights/widgets/flight_compare_sheet.dart';
 import '../booking/widgets/booking_confirm_sheet.dart';
+import 'widgets/agent_trace_view.dart';
 
 /// Controller managing the AI Travel Assistant conversation, agent tool traces, and state.
 class AssistantController extends GetxController {
@@ -22,6 +23,9 @@ class AssistantController extends GetxController {
 
   // Session ID for short-term memory persistence
   final String sessionId = const Uuid().v4();
+
+  // Observability: all executed tool traces across this conversation session
+  final allExecutedTraces = <ToolCallTrace>[].obs;
 
   // Active conversational state
   String? currentOrigin;
@@ -133,8 +137,75 @@ class AssistantController extends GetxController {
           ? historyList.sublist(historyList.length - 6)
           : historyList;
 
-      // 1. Send query, conversational state, and recent history to Agent Orchestrator
-      final agentResponse = await agentRepository.chatWithAgent(
+      // 1. Try Streaming SSE connection for live tool progress
+      AgentChatResponse? agentResponse;
+      try {
+        final List<ToolCallTrace> intermediateTraces = [];
+        await for (final event in agentRepository.chatWithAgentStream(
+          message: query,
+          state: travelState,
+          sessionId: sessionId,
+          chatHistory: recentHistory,
+        )) {
+          final eventType = event['event'] as String?;
+          final data = event['data'];
+
+          if (eventType == 'start') {
+            final idx = messages.indexWhere((m) => m.id == thinkingMsgId);
+            if (idx != -1) {
+              messages[idx] = ChatMessage(
+                id: thinkingMsgId,
+                role: MessageRole.assistant,
+                content: 'Agent analyzing query...',
+                timestamp: DateTime.now(),
+                isThinking: true,
+              );
+              messages.refresh();
+            }
+          } else if (eventType == 'tool_start' && data is Map<String, dynamic>) {
+            final toolName = data['tool_name'] as String? ?? 'tool';
+            final idx = messages.indexWhere((m) => m.id == thinkingMsgId);
+            if (idx != -1) {
+              messages[idx] = ChatMessage(
+                id: thinkingMsgId,
+                role: MessageRole.assistant,
+                content: 'Executing $toolName...',
+                timestamp: DateTime.now(),
+                isThinking: true,
+                toolTraces: intermediateTraces.isNotEmpty ? List.from(intermediateTraces) : null,
+              );
+              messages.refresh();
+              _scrollToBottom();
+            }
+          } else if (eventType == 'tool_result' && data is Map<String, dynamic>) {
+            final trace = ToolCallTrace.fromJson(data);
+            intermediateTraces.add(trace);
+            allExecutedTraces.add(trace);
+
+            final idx = messages.indexWhere((m) => m.id == thinkingMsgId);
+            if (idx != -1) {
+              messages[idx] = ChatMessage(
+                id: thinkingMsgId,
+                role: MessageRole.assistant,
+                content: 'Processing results from ${trace.toolName}...',
+                timestamp: DateTime.now(),
+                isThinking: true,
+                toolTraces: List.from(intermediateTraces),
+              );
+              messages.refresh();
+              _scrollToBottom();
+            }
+          } else if (eventType == 'assistant_message' && data is Map<String, dynamic>) {
+            agentResponse = AgentChatResponse.fromJson(data);
+            break;
+          }
+        }
+      } catch (streamError) {
+        debugPrint('[SSE] Streaming fallback to standard chat: $streamError');
+      }
+
+      // If stream did not complete or failed, fall back seamlessly to standard /chat
+      agentResponse ??= await agentRepository.chatWithAgent(
         message: query,
         state: travelState,
         sessionId: sessionId,
@@ -147,6 +218,9 @@ class AssistantController extends GetxController {
       if (travelState.destination != null) currentDestination = travelState.destination!;
       if (agentResponse.recommendedFlights.isNotEmpty) {
         lastLoadedFlights = agentResponse.recommendedFlights;
+      }
+      if (agentResponse.toolTrace.isNotEmpty) {
+        allExecutedTraces.addAll(agentResponse.toolTrace);
       }
 
       // 3. Remove thinking message and add assistant response
@@ -315,5 +389,18 @@ class AssistantController extends GetxController {
         );
       }
     });
+  }
+
+  /// Opens developer observability sheet showing executed tools, latency, and travel state.
+  void showTraceSheet() {
+    Get.bottomSheet(
+      AgentTraceView(
+        traces: allExecutedTraces,
+        travelState: travelState,
+        sessionId: sessionId,
+      ),
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+    );
   }
 }

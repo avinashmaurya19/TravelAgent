@@ -55,18 +55,20 @@ class MessageBubble extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       if (message.isThinking)
-                        const Row(
+                        Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            SizedBox(
+                            const SizedBox(
                               width: 14,
                               height: 14,
                               child: CircularProgressIndicator(strokeWidth: 2),
                             ),
-                            SizedBox(width: 8),
+                            const SizedBox(width: 8),
                             Text(
-                              'Agent is thinking & querying services...',
-                              style: TextStyle(fontSize: 13, fontStyle: FontStyle.italic),
+                              message.content.isNotEmpty
+                                  ? message.content
+                                  : 'Agent is thinking & querying services...',
+                              style: const TextStyle(fontSize: 13, fontStyle: FontStyle.italic),
                             ),
                           ],
                         )

@@ -59,9 +59,9 @@ This checklist tracks tasks across the 10 implementation phases.
 - [x] Inject user preferences into flight ranking pipeline while respecting explicit user query overrides (`2026-09-06`)
 
 ## Phase 9: Real-Time SSE Streaming & Observability Trace
-- [ ] Implement SSE endpoint (`GET /api/v1/chat/{session_id}/stream`) sending `tool_start`, `tool_result`, `assistant_message`
-- [ ] Wire Flutter chat screen to listen to SSE events and show live execution indicators
-- [ ] Build Developer Agent Trace screen in Flutter showing latency, tokens, tool args, and execution steps
+- [x] Implement SSE endpoint (`POST /api/v1/agent/chat/stream`) sending `start`, `tool_start`, `tool_result`, `assistant_message`, `stream_end` (`2026-09-06`)
+- [x] Wire Flutter chat screen with real-time tool tracking and persistence (`2026-09-06`)
+- [x] Build Developer Agent Trace screen in Flutter showing latency, metrics, tool args, and execution steps (`2026-09-06`)
 
 ## Phase 10: Evaluation, Guardrails & Demo Polish
 - [ ] Implement evaluation test suite (Test cases 1–5 in PRD Section 44)

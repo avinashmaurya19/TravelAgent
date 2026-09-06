@@ -3,7 +3,7 @@
 import json
 import time
 import logging
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any, Optional, Generator
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
@@ -67,18 +67,20 @@ class AgentOrchestrator:
         self.max_iterations = max_iterations
         self.user_preferences = user_preferences
 
-    def run(
+    def run_stream(
         self,
         user_message: str,
         state: Optional[TravelState] = None,
         chat_history: Optional[List[ChatMessage]] = None,
         user_preferences: Optional[Dict[str, Any]] = None,
-    ) -> AgentResult:
-        """Run the core while-loop agent orchestrator for a single user turn."""
+    ) -> Generator[Dict[str, Any], None, None]:
+        """Generator yielding real-time SSE streaming events throughout multi-turn tool execution."""
         current_state = state or TravelState()
         tool_traces: List[ToolExecutionTrace] = []
         recommended_flights: List[Dict[str, Any]] = []
         current_preferences = user_preferences or self.user_preferences
+
+        yield {"event": "start", "data": {"user_message": user_message}}
 
         # Prepare messages with current date context
         from datetime import date as dt_date
@@ -166,6 +168,15 @@ class AgentOrchestrator:
 
                 for tc in response.tool_calls:
                     logger.info("Executing tool '%s' with args %s", tc.name, tc.arguments)
+                    # Yield tool_start event
+                    yield {
+                        "event": "tool_start",
+                        "data": {
+                            "tool_name": tc.name,
+                            "arguments": tc.arguments,
+                        },
+                    }
+
                     start_time = time.perf_counter()
 
                     # Execute deterministic tool with database session
@@ -200,6 +211,17 @@ class AgentOrchestrator:
                     )
                     tool_traces.append(trace)
 
+                    # Yield tool_result event
+                    yield {
+                        "event": "tool_result",
+                        "data": {
+                            "tool_name": tc.name,
+                            "arguments": tc.arguments,
+                            "result": tool_result,
+                            "execution_time_ms": elapsed_ms,
+                        },
+                    }
+
                     # Feed tool result back to LLM conversation
                     messages.append(
                         ChatMessage(
@@ -220,11 +242,50 @@ class AgentOrchestrator:
         if not final_text and iteration >= self.max_iterations:
             final_text = "I completed searching our flight inventory. Please see the recommendations above."
 
-        return AgentResult(
-            response=final_text,
-            state=current_state,
-            recommended_flights=recommended_flights,
-            tool_trace=tool_traces,
+        # Yield assistant_message event with full turn results
+        yield {
+            "event": "assistant_message",
+            "data": {
+                "response": final_text,
+                "state": current_state.model_dump(),
+                "recommended_flights": recommended_flights,
+                "tool_trace": [t.model_dump() for t in tool_traces],
+            },
+        }
+
+        # Yield stream_end event
+        yield {
+            "event": "stream_end",
+            "data": {"status": "complete"},
+        }
+
+    def run(
+        self,
+        user_message: str,
+        state: Optional[TravelState] = None,
+        chat_history: Optional[List[ChatMessage]] = None,
+        user_preferences: Optional[Dict[str, Any]] = None,
+    ) -> AgentResult:
+        """Run the core while-loop agent orchestrator synchronously for a single user turn."""
+        final_result = None
+        for event in self.run_stream(
+            user_message=user_message,
+            state=state,
+            chat_history=chat_history,
+            user_preferences=user_preferences,
+        ):
+            if event["event"] == "assistant_message":
+                data = event["data"]
+                final_result = AgentResult(
+                    response=data["response"],
+                    state=TravelState(**data["state"]),
+                    recommended_flights=data["recommended_flights"],
+                    tool_trace=[ToolExecutionTrace(**t) for t in data["tool_trace"]],
+                )
+
+        return final_result or AgentResult(
+            response="I completed processing your request.",
+            state=state or TravelState(),
         )
 
     def _update_state(

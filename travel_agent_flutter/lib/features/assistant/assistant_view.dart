@@ -26,6 +26,11 @@ class AssistantView extends GetView<AssistantController> {
         ),
         actions: [
           IconButton(
+            icon: const Icon(Icons.analytics_outlined),
+            tooltip: 'Agent Observability Trace',
+            onPressed: controller.showTraceSheet,
+          ),
+          IconButton(
             icon: const Icon(Icons.info_outline),
             tooltip: 'Agent Architecture',
             onPressed: () {
