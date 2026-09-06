@@ -1,0 +1,13 @@
+.git
+.venv
+**/__pycache__
+*.pyc
+*.pyo
+*.pyd
+travel_agent_flutter
+.cursor
+.agents
+.pytest_cache
+*.db
+*.sqlite
+*.sqlite3
