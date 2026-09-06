@@ -162,3 +162,20 @@ The target product experience is a conversational assistant that acts with agenc
 - Test suite evaluating intent accuracy, tool selection, error recovery, and booking safety (`test_evaluation_benchmark.py`).
 - Automated guardrail verifier (`verify_guardrails.py`) & evaluation benchmark runner (`run_evaluation.py`).
 - Comprehensive documentation & interview demo script (`README.md`).
+
+### Phase 11: ixigo-Style Visual Results Canvas, Floating AI Co-Pilot & Free Voice Agent (Completed)
+- **Visual Results Canvas**:
+  - Top trip context header (`New Delhi ✈ Mumbai`, travellers, class, edit CTA).
+  - Horizontal `DateFareStrip` calendar with surrounding day fares and lowest-price green badge.
+  - Quick filter & sort chips carousel (`Filters`, `Sort By`, `Non-Stop`, `Airlines`, `Time`).
+  - Dark-themed `IxigoFlightCard` with cheapest badge, duration pill, lock price CTA button, and strikethrough original vs. final fare.
+  - Exclusive promo & bank offer banners carousel (e.g. ICICI Bank EMI, card discounts).
+- **Floating AI Co-Pilot Dock**:
+  - Animated pulsating glowing AI Orb with dynamic states (`Thinking`, `Listening`, `Speaking`).
+  - Quick suggestion chips (`Sort-by Cheapest`, `IndiGo Only`, `Morning Departure`).
+  - Dual voice and keyboard toggles (`[Mic]` and `[Keyboard]`), with expandable message transcript sheet (`[CC]`).
+- **100% Free Voice & Audio Intelligence (Zero API Keys)**:
+  - **Speech-to-Text (STT)**: 100% Free user voice input via `speech_to_text` (browser Web Speech Recognition on Web, Google Speech Services on Android, Apple Dictation on iOS; 0 API keys).
+  - **Text-to-Speech (TTS)**: 100% Free on-device speech synthesis via `flutter_tts` (natural Google/Apple voices) with backend Microsoft Edge Neural TTS (`edge-tts`, realistic `en-IN-NeerjaNeural` / `en-IN-PrabhatNeural` Indian English voices; 0 API keys).
+  - Live waveform animation and synchronized speech playback while the AI Orb glows.
+

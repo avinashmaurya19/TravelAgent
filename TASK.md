@@ -68,6 +68,14 @@ This checklist tracks tasks across the 10 implementation phases.
 - [x] Enforce guardrail validators (no direct DB access, tool whitelist, max file lines limit <500) (`2026-09-06`)
 - [x] Prepare comprehensive README, demo video guide, and technical interview talking points (`2026-09-06`)
 
+## Phase 11: ixigo-Style Visual Results Canvas, Floating AI Co-Pilot & Audio Voice Agent
+- [x] Implement dark-themed `IxigoFlightCard` with cheapest badge, duration pill, lock price CTA button, and strikethrough pricing (`2026-09-06`)
+- [x] Build horizontal `DateFareStrip` calendar with surrounding day fares and lowest-price green badge (`2026-09-06`)
+- [x] Create `FloatingAiDock` with animated pulsating glowing AI Orb (`Thinking`, `Listening`, `Speaking`) and quick filter suggestion chips (`2026-09-06`)
+- [x] Build `VoiceService` with Speech-to-Text (audio commands) and Text-to-Speech (agent voice output) (`2026-09-06`)
+- [x] Assemble the full ixigo Hybrid Canvas in `AssistantView` with toggleable chat history bottom sheet (`2026-09-06`)
+
+
 ---
 
 ## 🛠️ Discovered During Work

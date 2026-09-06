@@ -10,11 +10,13 @@ import '../../models/booking_model.dart';
 import '../flights/widgets/flight_compare_sheet.dart';
 import '../booking/widgets/booking_confirm_sheet.dart';
 import 'widgets/agent_trace_view.dart';
+import '../../services/voice_service.dart';
 
 /// Controller managing the AI Travel Assistant conversation, agent tool traces, and state.
 class AssistantController extends GetxController {
   final FlightRepository flightRepository = Get.find<FlightRepository>();
   final AgentRepository agentRepository = Get.find<AgentRepository>();
+  final VoiceService voiceService = Get.put(VoiceService());
 
   final textController = TextEditingController();
   final scrollController = ScrollController();
@@ -33,6 +35,11 @@ class AssistantController extends GetxController {
   DateTime currentDate = DateTime.now().add(const Duration(days: 1));
   List<FlightModel> lastLoadedFlights = [];
   TravelStateModel travelState = const TravelStateModel();
+
+  // ixigo Results Canvas Reactive State
+  final displayedFlights = <FlightModel>[].obs;
+  final selectedDate = DateTime.now().add(const Duration(days: 1)).obs;
+  final isResultsView = false.obs;
 
   final List<String> quickSuggestions = [
     'Show cheaper flights',
@@ -218,10 +225,15 @@ class AssistantController extends GetxController {
       if (travelState.destination != null) currentDestination = travelState.destination!;
       if (agentResponse.recommendedFlights.isNotEmpty) {
         lastLoadedFlights = agentResponse.recommendedFlights;
+        displayedFlights.assignAll(agentResponse.recommendedFlights);
+        isResultsView.value = true;
       }
       if (agentResponse.toolTrace.isNotEmpty) {
         allExecutedTraces.addAll(agentResponse.toolTrace);
       }
+
+      // Voice output: speak concise response
+      voiceService.speak(agentResponse.response);
 
       // 3. Remove thinking message and add assistant response
       messages.removeWhere((m) => m.id == thinkingMsgId);
@@ -348,6 +360,10 @@ class AssistantController extends GetxController {
 
       stopwatch.stop();
       lastLoadedFlights = results;
+      if (results.isNotEmpty) {
+        displayedFlights.assignAll(results);
+        isResultsView.value = true;
+      }
 
       messages.removeWhere((m) => m.id == thinkingMsgId);
       messages.add(
@@ -389,6 +405,26 @@ class AssistantController extends GetxController {
         );
       }
     });
+  }
+
+  void sendMessage(String text) => sendUserMessage(text);
+
+  void toggleVoiceListening() {
+    if (voiceService.isListening.value) {
+      voiceService.stopListening();
+    } else {
+      voiceService.startListening(
+        onCompleted: (result) {
+          sendMessage(result);
+        },
+      );
+    }
+  }
+
+  void selectDate(DateTime date) {
+    selectedDate.value = date;
+    final formatted = '${date.day} ${date.month == 9 ? 'Sept' : 'Oct'} ${date.year}';
+    sendMessage('Show flights on $formatted');
   }
 
   /// Opens developer observability sheet showing executed tools, latency, and travel state.
