@@ -19,6 +19,7 @@ AIRLINES = [
     {"name": "Vistara", "code": "UK", "has_biz": True},
     {"name": "Akasa Air", "code": "QP", "has_biz": False},
     {"name": "SpiceJet", "code": "SG", "has_biz": False},
+    {"name": "Emirates", "code": "EK", "has_biz": True},
 ]
 
 ROUTES = [
@@ -44,6 +45,10 @@ ROUTES = [
     {"origin": "DEL", "dest": "PNQ", "min_duration": 125, "base_price": 4300},
     {"origin": "AMD", "dest": "BOM", "min_duration": 75, "base_price": 2800},
     {"origin": "BOM", "dest": "AMD", "min_duration": 70, "base_price": 2800},
+    {"origin": "DEL", "dest": "DXB", "min_duration": 220, "base_price": 14500},
+    {"origin": "DXB", "dest": "DEL", "min_duration": 215, "base_price": 14800},
+    {"origin": "BOM", "dest": "DXB", "min_duration": 190, "base_price": 13200},
+    {"origin": "DXB", "dest": "BOM", "min_duration": 195, "base_price": 13500},
 ]
 
 DEPARTURE_SLOTS = [

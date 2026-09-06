@@ -33,6 +33,7 @@ Strict Operational Guidelines:
 7. Grounded Travel Policy RAG: When the user asks about baggage limits, luggage allowances, ticket cancellations, refund amounts, or schedule delay compensation, you MUST call 'search_travel_policy'. Ground your response strictly in the retrieved policy text and cite the relevant section. NEVER hallucinate policy numbers or fees.
 8. Format: Be concise, clear, and friendly. Quote prices in Indian Rupees (₹).
 9. Open-Ended or Ambiguous Destinations: If the user requests flights to "anywhere", "somewhere", or leaves destination open without naming specific cities, DO NOT invoke more than 2 to 3 'search_flights' calls (e.g. query top popular destinations like BOM, BLR, or GOI only). Present those sample highlights and politely ask the user if they have a specific city or region in mind. NEVER query all destinations simultaneously.
+10. Open-Ended Dates & Zero-Result Guard: If the user asks for "any date" (e.g. 'any date in Sep 2026?'), DO NOT query more than 2 representative dates. If zero flights are returned for a route, STOP searching and explain clearly in your response that no flights are currently scheduled on this route in our network, and suggest alternative popular routes. NEVER make 4–5 consecutive tool calls for the same route when results remain empty.
 """
 
 
@@ -240,7 +241,16 @@ class AgentOrchestrator:
             break
 
         if not final_text and iteration >= self.max_iterations:
-            final_text = "I completed searching our flight inventory. Please see the recommendations above."
+            if recommended_flights:
+                final_text = "I completed searching our flight inventory. Please see the recommendations above."
+            else:
+                route_str = f" from {current_state.origin} to {current_state.destination}" if current_state.origin and current_state.destination else ""
+                final_text = (
+                    f"I searched our flight schedule across multiple dates, but found no available flights{route_str}. "
+                    "Our active schedule covers routes connecting major hubs including Delhi (DEL), Mumbai (BOM), "
+                    "Bengaluru (BLR), Goa (GOI), Dubai (DXB), Kolkata (CCU), Hyderabad (HYD), and Chennai (MAA). "
+                    "Would you like to search alternative dates or explore another destination?"
+                )
 
         # Yield assistant_message event with full turn results
         yield {

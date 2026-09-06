@@ -64,9 +64,9 @@ This checklist tracks tasks across the 10 implementation phases.
 - [x] Build Developer Agent Trace screen in Flutter showing latency, metrics, tool args, and execution steps (`2026-09-06`)
 
 ## Phase 10: Evaluation, Guardrails & Demo Polish
-- [ ] Implement evaluation test suite (Test cases 1–5 in PRD Section 44)
-- [ ] Enforce guardrail validators (no direct DB access, tool whitelist, max file lines limit <500)
-- [ ] Prepare comprehensive README, demo video guide, and technical interview talking points
+- [x] Implement evaluation test suite (Test cases 1–5 in PRD Section 44) (`2026-09-06`)
+- [x] Enforce guardrail validators (no direct DB access, tool whitelist, max file lines limit <500) (`2026-09-06`)
+- [x] Prepare comprehensive README, demo video guide, and technical interview talking points (`2026-09-06`)
 
 ---
 

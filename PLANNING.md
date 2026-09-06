@@ -158,6 +158,7 @@ The target product experience is a conversational assistant that acts with agenc
 - Server-Sent Events endpoint (`/api/v1/chat/{session_id}/stream`).
 - Flutter Agent Trace timeline screen.
 
-### Phase 10: Evaluation, Guardrails & Polish (2 Days)
-- Test suite evaluating intent accuracy, tool selection, error recovery, and booking safety.
-- Documentation & interview demo script.
+### Phase 10: Evaluation, Guardrails & Polish (Completed)
+- Test suite evaluating intent accuracy, tool selection, error recovery, and booking safety (`test_evaluation_benchmark.py`).
+- Automated guardrail verifier (`verify_guardrails.py`) & evaluation benchmark runner (`run_evaluation.py`).
+- Comprehensive documentation & interview demo script (`README.md`).
