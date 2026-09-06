@@ -196,5 +196,19 @@ def seed_database():
         db.close()
 
 
+def seed_if_empty():
+    """Seed database with mock flights only if the table is currently empty."""
+    db = SessionLocal()
+    try:
+        if db.query(FlightModel).count() == 0:
+            print("Flight database is empty. Auto-seeding initial flight inventory...")
+            flights = generate_flight_records(total_days=30)
+            db.bulk_save_objects(flights)
+            db.commit()
+            print(f"✅ Successfully auto-seeded {len(flights)} flights!")
+    finally:
+        db.close()
+
+
 if __name__ == "__main__":
     seed_database()

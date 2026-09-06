@@ -27,6 +27,12 @@ async def lifespan(app: FastAPI):
     """Application startup and shutdown events."""
     # Create DB tables if they don't exist
     Base.metadata.create_all(bind=engine)
+    # Auto-seed mock flights on cold start if database is empty
+    try:
+        from scripts.generate_flights import seed_if_empty
+        seed_if_empty()
+    except Exception as e:
+        logging.warning("Auto-seed check failed or skipped: %s", e)
     yield
 
 
