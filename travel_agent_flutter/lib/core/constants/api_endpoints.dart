@@ -5,12 +5,18 @@ import 'package:flutter/foundation.dart';
 class ApiEndpoints {
   ApiEndpoints._();
 
+  /// Optional runtime override for tunnels (e.g. ngrok or Cloudflare tunnel URL).
+  static String? remoteUrl = 'https://harddisk-smugly-vagrantly.ngrok-free.dev';
+
   /// Resolves the base backend URL depending on target platform.
   /// Uses 10.0.2.2 for Android emulator, and localhost for Web/Desktop/iOS.
   static String get baseUrl {
+    if (remoteUrl != null && remoteUrl!.isNotEmpty) {
+      return remoteUrl!.endsWith('/api/v1') ? remoteUrl! : '${remoteUrl!}/api/v1';
+    }
     const customUrl = String.fromEnvironment('API_BASE_URL');
     if (customUrl.isNotEmpty) {
-      return customUrl;
+      return customUrl.endsWith('/api/v1') ? customUrl : '$customUrl/api/v1';
     }
     if (kIsWeb) {
       return 'http://localhost:8000/api/v1';
