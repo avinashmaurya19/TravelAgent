@@ -5,8 +5,8 @@ import 'package:flutter/foundation.dart';
 class ApiEndpoints {
   ApiEndpoints._();
 
-  /// Optional runtime override for tunnels (e.g. ngrok or Cloudflare tunnel URL).
-  static String? remoteUrl = 'https://harddisk-smugly-vagrantly.ngrok-free.dev';
+  /// Optional runtime override for cloud deployment (e.g. Render, ngrok, or Cloudflare tunnel URL).
+  static String? remoteUrl = 'https://travelagent-1jxf.onrender.com';
 
   /// Resolves the base backend URL depending on target platform.
   /// Uses 10.0.2.2 for Android emulator, and localhost for Web/Desktop/iOS.
